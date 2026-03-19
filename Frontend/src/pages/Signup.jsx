@@ -3,6 +3,7 @@ import { FiEye } from "react-icons/fi";
 import { FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import axios from "axios";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("user");
@@ -12,13 +13,33 @@ const Signup = () => {
   const [mobile, setMobile] = useState("");
   const naviagte = useNavigate();
 
-  const submitHandler = (e) => {
+  const signupHandler = async (e) => {
     e.preventDefault();
-    console.log(fullName);
-    console.log(email);
-    console.log(mobile);
-    console.log(role);
-    console.log(password);
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/auth/signup`,
+        {
+          fullName,
+          email,
+          mobile,
+          role: role.toLowerCase(),
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        },
+      );
+      if (res.data.success) {
+        console.log(res);
+        naviagte("/signin");
+      }
+    } catch (error) {
+      console.error("Signup error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Signup failed");
+    }
   };
 
   return (
@@ -30,7 +51,7 @@ const Signup = () => {
         <p className="text-md text-gray-500">
           create your account to get started with delicious food deliveries
         </p>
-        <form onSubmit={submitHandler}>
+        <form onSubmit={signupHandler}>
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
