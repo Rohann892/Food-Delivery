@@ -4,17 +4,23 @@ import { FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebase";
+import { ClipLoader } from "react-spinners";
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const naviagte = useNavigate();
+  const navigate = useNavigate();
 
   const signinHandler = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const res = await axios.post(
         `http://localhost:8000/api/auth/signin`,
         {
@@ -29,12 +35,43 @@ const Signin = () => {
         },
       );
       if (res.data.success) {
+        setError("");
         console.log(res);
-        naviagte("/");
+        navigate("/");
       }
     } catch (error) {
-      console.error("Signup error:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Signup failed");
+      setError(error.response.data.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const googleAuth = async () => {
+    try {
+      setLoading(true);
+      const provider = new GoogleAuthProvider();
+      const res = await signInWithPopup(auth, provider);
+
+      const { data } = await axios.post(
+        `http://localhost:8000/api/auth/google-auth`,
+        {
+          email: res.user.email,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (data.success) {
+        navigate("/");
+        setError("");
+      } else {
+        alert(data.message || "Authentication failed");
+      }
+    } catch (error) {
+      setError(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,7 +88,7 @@ const Signin = () => {
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Email
             </label>
@@ -66,7 +103,7 @@ const Signin = () => {
           <div className="relative flex flex-col">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Password
             </label>
@@ -87,27 +124,29 @@ const Signin = () => {
           </div>
           <div
             className="text-right mt-2 text-[#ff4d2d] font-medium cursor-pointer"
-            onClick={() => naviagte("/forgot-password")}
+            onClick={() => navigate("/forgot-password")}
           >
             Forgot password
           </div>
           <button
             type="submit"
             className="w-full bg-[#ff4d2d] px-2 py-2 rounded-full hover:bg-[#f63614] mt-4 text-white cursor-pointer transition-duration-200"
+            disabled={loading}
           >
-            SignIn
+            {loading ? <ClipLoader size={20} color="white" /> : "SignIn"}
           </button>
+          {error && <p className="text-red-500 text-center my-2 ">*{error}</p>}
         </form>
         <div className="flex items-center justify-center gap-3 my-3 border border-gray-300 py-2 rounded-full hover:bg-gray-200/50">
           <FcGoogle size={30} />
-          <span>Signup with Google</span>
+          <span onClick={googleAuth}>Signin with Google</span>
         </div>
         <div className="text-center mt-3">
           <p className="text-gray-600">
             Don't have an account{" "}
             <span
               className="text-blue-600 hover:underline"
-              onClick={() => naviagte("/signup")}
+              onClick={() => navigate("/signup")}
             >
               SignUp
             </span>

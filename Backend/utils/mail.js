@@ -1,6 +1,8 @@
 import nodeMailer from 'nodemailer'
+import dotenv from 'dotenv'
+dotenv.config();
 
-const transporter = nodemailer.createTransport({
+const transporter = nodeMailer.createTransport({
     service: "Gmail",
     port: 465,
     secure: true,

@@ -1,5 +1,5 @@
 import express from 'express';
-import { logout, resetPassword, sendOtp, signin, signup, verifyOtp } from '../controllers/userController.js';
+import { googleAuth, logout, resetPassword, sendOtp, signin, signup, verifyOtp } from '../controllers/userController.js';
 const authRouter = express.Router();
 
 authRouter.post('/signup', signup);
@@ -8,5 +8,6 @@ authRouter.get('/signout', logout);
 authRouter.post('/send-otp', sendOtp);
 authRouter.post('/verify-otp', verifyOtp);
 authRouter.post('/reset-password', resetPassword);
+authRouter.post('/google-auth', googleAuth);
 
 export default authRouter;

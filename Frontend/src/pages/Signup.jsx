@@ -4,6 +4,9 @@ import { FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebase";
+import { ClipLoader } from "react-spinners";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("user");
@@ -11,11 +14,14 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const naviagte = useNavigate();
 
   const signupHandler = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const res = await axios.post(
         `http://localhost:8000/api/auth/signup`,
         {
@@ -33,12 +39,40 @@ const Signup = () => {
         },
       );
       if (res.data.success) {
+        setError("");
         console.log(res);
         naviagte("/signin");
       }
     } catch (error) {
-      console.error("Signup error:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Signup failed");
+      setError(error.response.data.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    if (!mobile) {
+      setError("mobile number is required");
+    }
+    const provider = new GoogleAuthProvider();
+    const res = await signInWithPopup(auth, provider);
+    console.log(res);
+    try {
+      setLoading(true);
+      const { data } = await axios.post(
+        `http://localhost:8000/api/auth/google-auth`,
+        {
+          fullName: res.user.displayName,
+          email: res.user.email,
+          role,
+          mobile,
+        },
+      );
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,7 +89,7 @@ const Signup = () => {
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Full Name
             </label>
@@ -70,7 +104,7 @@ const Signup = () => {
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Email
             </label>
@@ -85,7 +119,7 @@ const Signup = () => {
           <div className="relative flex flex-col">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Password
             </label>
@@ -107,7 +141,7 @@ const Signup = () => {
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Mobile no.
             </label>
@@ -122,7 +156,7 @@ const Signup = () => {
           <div className="mb-4 flex flex-col mt-3">
             <label
               htmlFor="fullName"
-              className="block font-bold text-gray-500 font-medium mb-1"
+              className="block font-bold text-gray-500 mb-1"
             >
               Role
             </label>
@@ -148,10 +182,14 @@ const Signup = () => {
             type="submit"
             className="w-full bg-[#ff4d2d] px-2 py-2 rounded-full hover:bg-[#f63614] mt-4 text-white cursor-pointer transition-duration-200"
           >
-            SignUp
+            {loading ? <ClipLoader size={20} color="white" /> : "SignUp"}
           </button>
+          {error && <p className="text-red-500 text-center my-2">*{error}</p>}
         </form>
-        <div className="flex items-center justify-center gap-3 my-3 border border-gray-300 py-2 rounded-full hover:bg-gray-200/50">
+        <div
+          className="flex items-center justify-center gap-3 my-3 border border-gray-300 py-2 rounded-full hover:bg-gray-200/50"
+          onClick={handleGoogleAuth}
+        >
           <FcGoogle size={30} />
           <span>Signup with Google</span>
         </div>

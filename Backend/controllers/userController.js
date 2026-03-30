@@ -117,7 +117,7 @@ export const logout = async (_, res) => {
 export const sendOtp = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = User.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -125,7 +125,7 @@ export const sendOtp = async (req, res) => {
             })
         }
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
-        user.restOtp = otp;
+        user.resetOtp = otp;
         user.otpExpires = Date.now() + 5 * 60 * 1000;
         user.isOtpVerified = false;
         await user.save();
@@ -170,7 +170,7 @@ export const verifyOtp = async (req, res) => {
 export const resetPassword = async (req, res) => {
     try {
         const { email, newPassword } = req.body;
-        const user = User.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user || !user.isOtpVerified) {
             return res.status(400).json({
 
@@ -183,6 +183,42 @@ export const resetPassword = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Password reset successfully'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+
+export const googleAuth = async (req, res) => {
+    try {
+        const { fullName, email, mobile, role } = req.body;
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                fullName,
+                email,
+                mobile,
+                role
+            })
+        }
+
+        const token = generateToken(user._id);
+        res.cookie("token", token, {
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: 'singed in successfully',
+            user,
         })
     } catch (error) {
         console.log(error);
