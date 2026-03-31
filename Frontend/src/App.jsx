@@ -7,9 +7,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 import useGetCurrentUser from "./hooks/useGetCurrentUser";
 import Home from "./pages/Home";
 import { useSelector } from "react-redux";
+import useGetCity from "./hooks/useGetCity";
 
 function App() {
   useGetCurrentUser();
+  useGetCity();
   const { userData } = useSelector((state) => state.user);
   return (
     <>
@@ -24,7 +26,7 @@ function App() {
         />
         <Route
           path="/forgot-password"
-          element={!userData ? <ForgotPassword /> : <Navigate to={"/"} />}
+          element={!userData ? <ForgotPassword /> : <Navigate to={"/signin"} />}
         />
         <Route
           path="/"
