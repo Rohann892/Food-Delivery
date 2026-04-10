@@ -12,6 +12,8 @@ import useGetMyShop from "./hooks/useGetMyShop";
 import CreateEditShop from "./pages/CreateEditShop";
 import AddFoodItem from "./pages/AddFoodItem";
 import EditItem from "./pages/EditItem";
+import CartPage from "./pages/CartPage";
+import CheckOut from "./pages/CheckOut";
 
 function App() {
   useGetCurrentUser();
@@ -53,6 +55,18 @@ function App() {
           path="/edit-item/:itemId"
           element={
             userData ? <EditItem /> : <Navigate to={"/signin"}></Navigate>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            userData ? <CartPage /> : <Navigate to={"/signin"}></Navigate>
+          }
+        />
+        <Route
+          path="/check-out"
+          element={
+            userData ? <CheckOut /> : <Navigate to={"/signin"}></Navigate>
           }
         />
       </Routes>

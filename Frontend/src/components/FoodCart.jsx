@@ -6,8 +6,12 @@ import { CiStar } from "react-icons/ci";
 import { FaMinus } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
 import { FaCartArrowDown } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../Redux/userSlice";
 
 const FoodCart = ({ data }) => {
+  const { cartItems } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(0);
   const renderStar = (rating) => {
     const stars = [];
@@ -74,7 +78,23 @@ const FoodCart = ({ data }) => {
             >
               <FaPlus />
             </button>
-            <button className="bg-[#ff4d2d] px-3 py-2 hover:bg-gray-100 transition-colors">
+            <button
+              className={`${cartItems.some((i) => i.id == data._id) ? "bg-gray-800" : "bg-[#ff4d2d]"} text-white px-3 py-2 transition-colors ${quantity === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+              onClick={() => {
+                if (quantity === 0) return;
+                dispatch(
+                  addToCart({
+                    id: data._id,
+                    name: data.name,
+                    price: data.price,
+                    image: data.image,
+                    shop: data.shop,
+                    quantity,
+                    foodType: data.foodType,
+                  }),
+                );
+              }}
+            >
               <FaCartArrowDown className="text-white" size={18} />
             </button>
           </div>

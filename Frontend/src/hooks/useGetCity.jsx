@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setCity, setCurentAddress, setState } from "../Redux/userSlice";
+import { setAddress, setLocation } from "../Redux/mapSlice";
 
 const useGetCity = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const useGetCity = () => {
         try {
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
+          dispatch(setLocation({ lat: latitude, lon: longitude }));
           const res = await axios.get(
             `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${apikey}`,
           );
@@ -23,6 +25,7 @@ const useGetCity = () => {
           dispatch(setState(stateName));
           dispatch(setCity(cityName));
           dispatch(setCurentAddress(addresss));
+          dispatch(setAddress(addresss));
         } catch (error) {
           console.error("Error fetching city:", error);
         }
