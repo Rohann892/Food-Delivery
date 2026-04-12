@@ -44,7 +44,6 @@ const Signup = () => {
       );
       if (res.data.success) {
         setError("");
-        console.log(res);
         dispatch(setUserData(res.data.user));
         dispatch(clearMyShopData());
         naviagte("/signin");
@@ -62,7 +61,6 @@ const Signup = () => {
     }
     const provider = new GoogleAuthProvider();
     const res = await signInWithPopup(auth, provider);
-    console.log(res);
     try {
       setLoading(true);
       const result = await axios.post(

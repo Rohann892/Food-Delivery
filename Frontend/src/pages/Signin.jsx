@@ -72,7 +72,6 @@ const Signin = () => {
 
       if (result?.data?.success) {
         setError("");
-        console.log(result);
         dispatch(setUserData(result.data.user));
         dispatch(clearMyShopData());
         navigate("/");
@@ -80,7 +79,6 @@ const Signin = () => {
         setError(result?.data.message || "Authentication failed");
       }
     } catch (error) {
-      console.error("Google Auth error:", error);
       setError(
         error.response?.data?.message ||
           error.message ||

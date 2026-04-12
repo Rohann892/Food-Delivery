@@ -20,16 +20,13 @@ const useGetMyShop = () => {
           withCredentials: true,
         });
         if (res.data.success && res.data.shop) {
-          console.log("Shop data fetched:", res.data.shop);
           dispatch(setMyShopData(res.data.shop));
         } else {
           // No shop found for this owner
-          console.log("No shop found");
           dispatch(clearMyShopData());
         }
       } catch (error) {
-        console.log("Error fetching shop:", error);
-        // Clear shop data on error (no shop found)
+        console.log(error);
         dispatch(clearMyShopData());
       }
     };

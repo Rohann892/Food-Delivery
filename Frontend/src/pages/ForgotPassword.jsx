@@ -28,7 +28,6 @@ const ForgotPassword = () => {
       );
       if (res.data.success) {
         setError("");
-        console.log(res);
         setStep(2);
       }
     } catch (error) {
@@ -53,7 +52,6 @@ const ForgotPassword = () => {
       );
       if (res.data.success) {
         setError("");
-        console.log(res);
         setStep(3);
       }
     } catch (error) {
@@ -78,7 +76,6 @@ const ForgotPassword = () => {
       );
       if (res.data.success) {
         setError("");
-        console.log(res);
         navigate("/signin");
       }
     } catch (error) {

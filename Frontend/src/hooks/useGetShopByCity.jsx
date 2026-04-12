@@ -16,7 +16,6 @@ const useGetShopByCity = () => {
           `http://localhost:8000/api/shop/get-by-city/${city}`,
           { withCredentials: true },
         );
-        console.log(res.data);
         dispatch(setShopInMyCity(res.data.shops));
       } catch (error) {
         console.log(error);

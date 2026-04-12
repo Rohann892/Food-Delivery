@@ -83,7 +83,6 @@ const CheckOut = () => {
         { withCredentials: true },
       );
 
-      console.log(res.data);
       if (res.data.success) {
         navigate("/order-placed");
       }

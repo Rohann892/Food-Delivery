@@ -15,10 +15,9 @@ const useGetCurrentUser = () => {
           dispatch(setCurrentUserRole(res.data.user.role));
         }
       } catch (error) {
+        // Handle error fetching current user
         if (error.response?.status !== 401) {
-          console.error("Error fetching current user:", error.message);
-        } else {
-          console.log("User not authenticated");
+          // Error fetching user
         }
       }
     };

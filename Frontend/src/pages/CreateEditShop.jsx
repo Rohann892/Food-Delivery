@@ -32,7 +32,6 @@ const CreateEditShop = () => {
     try {
       setLoading(true);
       const formData = new FormData();
-      console.log("my shop data is: ", myShopData);
       formData.append("name", name);
       formData.append("city", city);
       formData.append("state", state);
@@ -48,25 +47,19 @@ const CreateEditShop = () => {
           timeout: 60000, // 60 seconds for file uploads
         },
       );
-      console.log("Response received:", res.data);
-      console.log("res printed");
       if (res.data.success) {
         dispatch(setMyShopData(res.data.shop));
         alert("Shop created/updated successfully!");
         navigate("/");
       }
     } catch (error) {
-      console.log("Error caught:", error);
+      // Error handling
       if (error.response) {
-        console.log(
-          "Server response error:",
-          error.response.status,
-          error.response.data,
-        );
+        // Server response error
       } else if (error.request) {
-        console.log("No response from server:", error.message);
+        // No response from server
       } else {
-        console.log("Error:", error.message);
+        // Error in request setup
       }
     } finally {
       setLoading(false);

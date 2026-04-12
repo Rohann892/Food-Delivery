@@ -3,7 +3,6 @@ import { IoArrowBack } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { FaUtensils } from "react-icons/fa";
 import { useSelector } from "react-redux";
-
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
 
@@ -18,6 +17,7 @@ const AddFoodItem = () => {
   const [category, setCategory] = useState("");
   const [foodType, setFoodType] = useState("veg");
   const [loading, setLoading] = useState(false);
+
   const categories = [
     "Snacks",
     "Main course",
@@ -39,38 +39,33 @@ const AddFoodItem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ Validate before setting loading
+    if (!backendImage) {
+      alert("Please select an image");
+      return;
+    }
+
     try {
       setLoading(true);
-      if (!backendImage) {
-        alert("Please select an image");
-        return;
-      }
       const formData = new FormData();
-      console.log("my shop data is: ", myShopData);
       formData.append("name", name);
       formData.append("category", category);
       formData.append("foodType", foodType);
       formData.append("price", price);
+      formData.append("image", backendImage);
 
-      if (backendImage) {
-        formData.append("image", backendImage);
-      }
       const res = await axios.post(
         `http://localhost:8000/api/item/add-item`,
         formData,
-        {
-          withCredentials: true,
-          timeout: 60000, // 60 seconds for file uploads
-        },
+        { withCredentials: true, timeout: 60000 },
       );
-      console.log("Response received:", res.data);
-      console.log("res printed");
+
       if (res.data.success) {
         alert("Item added successfully!");
         navigate("/");
       }
     } catch (error) {
-      console.log("Error caught:", error);
       if (error.response) {
         console.log(
           "Server response error:",
@@ -79,10 +74,8 @@ const AddFoodItem = () => {
         );
         alert(`Error: ${error.response.data.message}`);
       } else if (error.request) {
-        console.log("No response from server:", error.message);
         alert("Network error - no response from server");
       } else {
-        console.log("Error:", error.message);
         alert(`Error: ${error.message}`);
       }
     } finally {
@@ -91,7 +84,8 @@ const AddFoodItem = () => {
   };
 
   return (
-    <div className="flex justify-center flex col items-center p-6 bg-gradient-to-br from-orange-50 relative to-white min-h-screen">
+    <div className="flex justify-center flex-col items-center p-6 bg-gradient-to-br from-orange-50 relative to-white min-h-screen">
+      {/* ✅ fixed: flex-col not "flex col" */}
       <div
         className="absolute top-[20px] left-[20px] z-[10] mb-[10px]"
         onClick={() => navigate("/")}
@@ -116,8 +110,8 @@ const AddFoodItem = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter Shop name"
-              className="w-full px-4 py-2 border border-gray-200 outline-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Enter dish name"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <div>
@@ -127,14 +121,14 @@ const AddFoodItem = () => {
             <input
               onChange={handleImage}
               type="file"
-              placeholder="Enter Shop name"
-              className="w-full px-4 py-2 border border-gray-200 outline-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              accept="image/*"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             {frontEndImage && (
               <div className="mt-4">
                 <img
                   src={frontEndImage}
-                  alt="image from frontend"
+                  alt="Food preview"
                   className="w-full h-48 object-cover rounded-lg border border-gray-100"
                 />
               </div>
@@ -149,7 +143,7 @@ const AddFoodItem = () => {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Enter the price"
-              className="w-full px-4 py-2 border border-gray-200 outline-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <div>
@@ -159,11 +153,11 @@ const AddFoodItem = () => {
             <select
               value={foodType}
               onChange={(e) => setFoodType(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 outline-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 mt-2"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Select Food Type</option>
-              <option value="veg">veg</option>
-              <option value="non veg">non veg</option>
+              <option value="veg">Veg</option>
+              <option value="non veg">Non Veg</option>
             </select>
           </div>
           <div>
@@ -173,7 +167,7 @@ const AddFoodItem = () => {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 outline-none rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Select Category</option>
               {categories.map((cate, index) => (
@@ -184,7 +178,7 @@ const AddFoodItem = () => {
             </select>
           </div>
           <button
-            className="w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 shadow-lg transition-all duration-200 cursor-pointer"
+            className="w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 transition-all duration-200 cursor-pointer"
             disabled={loading}
           >
             {loading ? <ClipLoader color="white" /> : "Save"}
