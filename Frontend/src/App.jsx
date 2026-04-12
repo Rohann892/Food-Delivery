@@ -14,11 +14,15 @@ import AddFoodItem from "./pages/AddFoodItem";
 import EditItem from "./pages/EditItem";
 import CartPage from "./pages/CartPage";
 import CheckOut from "./pages/CheckOut";
+import OrderPlaced from "./pages/OrderPlaced";
+import MyOrder from "./pages/MyOrder";
+import useGetMyOrder from "./hooks/useGetMyOrder";
 
 function App() {
   useGetCurrentUser();
   useGetCity();
   useGetMyShop();
+  useGetMyOrder();
   const { userData } = useSelector((state) => state.user);
   return (
     <>
@@ -67,6 +71,18 @@ function App() {
           path="/check-out"
           element={
             userData ? <CheckOut /> : <Navigate to={"/signin"}></Navigate>
+          }
+        />
+        <Route
+          path="/order-placed"
+          element={
+            userData ? <OrderPlaced /> : <Navigate to={"/signin"}></Navigate>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            userData ? <MyOrder /> : <Navigate to={"/signin"}></Navigate>
           }
         />
       </Routes>

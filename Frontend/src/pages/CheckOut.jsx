@@ -26,10 +26,13 @@ const CheckOut = () => {
   const dispatch = useDispatch();
 
   const { location, address } = useSelector((state) => state.map);
-  const { cartItems } = useSelector((state) => state.user);
+  const { cartItems, totalAmount } = useSelector((state) => state.user);
 
   const [addressInput, setAddressInput] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
+
+  const deliveryFee = totalAmount > 500 ? 0 : 50;
+  const totalAmountWithDelivery = totalAmount + deliveryFee;
 
   const onDragEnd = (e) => {
     const { lat, lng } = e.target._latlng;
@@ -58,6 +61,32 @@ const CheckOut = () => {
       const lat = res.data.features[1].properties.lat;
       const lon = res.data.features[1].properties.lon;
       dispatch(setLocation({ lat, lon }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/order/place-order`,
+        {
+          paymentMethod,
+          deliveryAddress: {
+            text: addressInput,
+            latitude: location.lat,
+            longitude: location.lon,
+          },
+          totalAmount,
+          cartItems,
+        },
+        { withCredentials: true },
+      );
+
+      console.log(res.data);
+      if (res.data.success) {
+        navigate("/order-placed");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -193,14 +222,35 @@ const CheckOut = () => {
                   alt=""
                   className="w-12 h-12 border object-cover cursor-not-allowed flex flex-start rounded-lg "
                 />
-                <span>
+                <span className="items-start">
                   {item.name} x {item.quantity}
                 </span>
                 <span>₹{item.price * item.quantity}</span>
               </div>
             ))}
+            <hr className="border-gray-200 my-2" />
+            <div className="flex justify-between font-medium text-gray-800">
+              <span>SubTotal</span>
+              <span>{totalAmount}</span>
+            </div>
+            <div className="flex justify-between font-medium text-gray-800">
+              <span>Delivery Fee</span>
+              <span>{deliveryFee == 0 ? "Free" : deliveryFee}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold text-[#ff4d2d] pt-2">
+              <span>Total</span>
+              <span>{totalAmountWithDelivery}</span>
+            </div>
           </div>
         </section>
+        <div>
+          <button
+            className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white py-3 rounded-xl font-semibold"
+            onClick={() => handlePlaceOrder()}
+          >
+            {paymentMethod === "cod" ? "Place Order" : "Pay & Place Order"}
+          </button>
+        </div>
       </div>
     </div>
   );

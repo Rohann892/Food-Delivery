@@ -40,7 +40,6 @@ const Signin = () => {
       );
       if (res.data.success) {
         setError("");
-        console.log(res);
         dispatch(setUserData(res.data.user));
         dispatch(clearMyShopData());
         navigate("/");

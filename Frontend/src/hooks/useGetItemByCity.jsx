@@ -14,7 +14,6 @@ const useGetItemByCity = () => {
           `http://localhost:8000/api/item/get-by-city/${city}`,
           { withCredentials: true },
         );
-        console.log(res);
         dispatch(setItemsInCity(res.data.items));
       } catch (error) {
         console.log(error);

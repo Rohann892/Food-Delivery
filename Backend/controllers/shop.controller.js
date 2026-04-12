@@ -51,10 +51,11 @@ export const createShop = async (req, res) => {
                 state,
                 address,
                 image
-            }, { new: true })
+            }, { new: true, returnDocument: 'after' })
         }
 
-        await existingShop.populate("owner").populate("items");
+        // Populate regardless of create or update
+        existingShop = await Shop.findById(existingShop._id).populate("owner").populate("items");
         console.log("Shop created/updated successfully:", existingShop);
         return res.status(201).json({
             success: true,
