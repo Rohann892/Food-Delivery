@@ -118,7 +118,7 @@ const Nav = () => {
       {userData.role == "user" && (
         <div className="md:w-[60%] lg:w-[40%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] hidden md:flex">
           <div
-            className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400 cursor-pointer hover:bg-gray-50 rounded py-2"
+            className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] cursor-pointer hover:bg-gray-50 rounded py-2"
             onClick={() => setShowLocationModal(true)}
             title="Click to change location"
           >

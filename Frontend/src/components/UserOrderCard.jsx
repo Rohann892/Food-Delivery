@@ -10,28 +10,6 @@ const UserOrderCard = ({ data }) => {
     });
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "out for delivery":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const totalItems = data?.cartItems?.reduce(
-    (sum, item) => sum + (item.quantity || 1),
-    0,
-  );
-
   return (
     <div className="bg-white rounded-lg shadow-md p-4 space-y-4 border-l-4 border-[#ff4d2d]">
       {/* Header */}
@@ -42,53 +20,71 @@ const UserOrderCard = ({ data }) => {
             {formatedData(data?.createdAt)}
           </p>
         </div>
-        <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(data?.status)}`}
-        >
-          {data?.status}
-        </span>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">
+            {data.paymentMethod?.toUpperCase()}
+          </p>
+          <p className="font-medium text-blue-500">
+            {data.shopOrders[0]?.status}
+          </p>
+        </div>
       </div>
 
-      {/* Order Items */}
-      {data?.cartItems && data?.cartItems.length > 0 && (
-        <div className="border-t pt-3">
-          <p className="text-sm font-semibold text-gray-700 mb-2">
-            Items ({totalItems})
+      {/* One block per shop */}
+      {data.shopOrders.map((shopOrder, index) => (
+        <div
+          key={index}
+          className="border bg-[#fffaf7] rounded-lg pb-2 p-3 gap-1"
+        >
+          {/* Shop name */}
+          <p className="font-semibold text-gray-700 mb-2">
+            {shopOrder.shop?.name}
           </p>
-          <div className="space-y-1 max-h-[100px] overflow-y-auto">
-            {data?.cartItems?.map((item, idx) => (
+
+          {/* Items in a horizontal scroll row — one shop per row */}
+          <div className="flex shrink-0 overflow-x-auto pb-2 gap-2">
+            {shopOrder.shopOrderItems.map((i, idx) => (
               <div
                 key={idx}
-                className="flex justify-between text-sm text-gray-600"
+                className="flex flex-col shrink-0 w-40 border rounded-lg p-2 bg-white"
               >
-                <span>
-                  {item?.name || "Item"} x {item?.quantity || 1}
-                </span>
-                <span>₹{(item?.price * (item?.quantity || 1)).toFixed(2)}</span>
+                <img
+                  src={i.item?.image}
+                  alt=""
+                  className="w-full h-24 object-cover rounded"
+                />
+                <p className="text-sm font-semibold mt-1">{i.name}</p>
+                <p className="text-xs text-gray-500">
+                  Qty: {i.quantity} x ₹{i.price}
+                </p>
               </div>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Delivery Address */}
-      {data?.deliveryAddress && (
-        <div className="border-t pt-3">
-          <p className="text-sm font-semibold text-gray-700 mb-1">
-            Delivery Address
-          </p>
-          <p className="text-sm text-gray-600">
-            {data?.deliveryAddress?.text || data?.deliveryAddress}
-          </p>
+          {/* Subtotal + status per shop */}
+          <div className="flex justify-between items-center border-t pt-2">
+            <p className="font-medium text-gray-800">
+              Subtotal: <span className="pl-2">₹{shopOrder.subtotal}</span>
+            </p>
+            <p className="text-xs text-blue-500">{shopOrder.status}</p>
+          </div>
         </div>
-      )}
+      ))}
 
-      {/* Total Amount */}
-      <div className="border-t pt-3 flex justify-between items-center">
-        <p className="font-semibold text-gray-800">Total Amount:</p>
-        <p className="text-lg font-bold text-[#ff4d2d]">
-          ₹{(data?.totalAmount || 0).toFixed(2)}
+      {/* ✅ Total Amount ONCE outside the shop loop */}
+      <div className="flex justify-between items-center border-t pt-3">
+        <p className="font-medium text-lg">
+          Total Amount:{" "}
+          <span className="text-[#ff4d2d]">
+            ₹{data.totalAmount > 500 ? data.totalAmount : data.totalAmount + 50}
+          </span>
+          {data.totalAmount <= 500 && (
+            <span className="text-xs text-gray-400 ml-2">(+₹50 delivery)</span>
+          )}
         </p>
+        <button className="bg-[#ff4d2d] hover:bg-[#e65426] px-3 py-2 rounded-lg transition cursor-pointer text-base text-white">
+          Track
+        </button>
       </div>
     </div>
   );

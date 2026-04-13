@@ -13,6 +13,7 @@ const useGetMyOrder = () => {
           `http://localhost:8000/api/order/my-orders`,
           { withCredentials: true },
         );
+        console.log(res.data);
         if (res.data.success && res.data.orders) {
           dispatch(setMyOrders(res.data.orders));
         }

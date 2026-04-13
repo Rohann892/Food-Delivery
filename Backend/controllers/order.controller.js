@@ -5,8 +5,8 @@ import User from "../models/user.model.js";
 export const placeOrder = async (req, res) => {
     try {
         const { cartItems, deliveryAddress, paymentMethod, totalAmount } = req.body;
-        if (cartItems.length === 0 || !cartItems) {
-            return res.stats(400).json({
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(400).json({
                 success: false,
                 message: 'cart items not found'
             })
@@ -51,11 +51,15 @@ export const placeOrder = async (req, res) => {
 
         const newOrder = await Order.create({
             user: req.user,
-            paymentMehthod: 'cod',
+            paymentMethod,
             totalAmount,
             deliveryAddress,
             shopOrders
         })
+
+        await newOrder.populate('shopOrders.shopOrderItems.item', 'name image price')
+        await newOrder.populate('shopOrders.shop', 'name')
+
 
         return res.status(201).json({
             success: true,
@@ -89,6 +93,19 @@ export const getMyOrder = async (req, res) => {
                 .sort({ createdAt: -1 })
                 .populate("user")
                 .populate("shopOrders.shopOrderItems.item", "name price image");
+
+            const filteredOrders = orders.map((order => ({
+                _id: order._id,
+                paymentMethod: order.paymentMethod,
+                user: order.user,
+                shopOrders: order.shopOrders.filter(o => o.owner.toString() === req.user.toString()),
+                createdAt: order.createdAt,
+                deliveryAddress: order.deliveryAddress,
+            })))
+            return res.status(200).json({
+                success: true,
+                orders: filteredOrders
+            })
         }
 
         if (orders.length === 0) {
@@ -110,3 +127,46 @@ export const getMyOrder = async (req, res) => {
         });
     }
 }
+
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId, shopId } = req.params;
+        const { status } = req.body;
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        // ✅ Compare as strings
+        const shopOrder = order.shopOrders.find(
+            o => o._id.toString() === shopId.toString()
+        );
+
+        if (!shopOrder) {
+            return res.status(400).json({
+                success: false,
+                message: 'Shop order not found'
+            });
+        }
+
+        shopOrder.status = status;
+        await order.save(); // ✅ Save parent, not subdocument
+
+        return res.status(200).json({
+            success: true,
+            message: 'Status updated',
+            status: shopOrder.status
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};

@@ -29,15 +29,19 @@ const MyOrder = () => {
           ) : (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <p className="text-gray-600 text-lg">No orders found</p>
-              <p className="text-gray-500 text-sm mt-2">
-                Start by placing an order to see it here
-              </p>
-              <button
-                onClick={() => navigate("/")}
-                className="mt-4 px-6 py-2 bg-[#ff4d2d] text-white rounded-lg hover:bg-[#ff3d1a]"
-              >
-                Continue Shopping
-              </button>
+              {userData.role === "user" && (
+                <>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Start by placing an order to see it here
+                  </p>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="mt-4 px-6 py-2 bg-[#ff4d2d] text-white rounded-lg hover:bg-[#ff3d1a]"
+                  >
+                    Continue Shopping
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

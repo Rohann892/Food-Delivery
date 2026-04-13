@@ -12,6 +12,7 @@ import axios from "axios";
 import { MdDeliveryDining } from "react-icons/md";
 import { GiSmartphone } from "react-icons/gi";
 import { FaCreditCard } from "react-icons/fa";
+import { addMyOrders } from "../Redux/userSlice";
 
 function RecenterMap({ location }) {
   if (location?.lat !== undefined && location?.lon !== undefined) {
@@ -82,8 +83,9 @@ const CheckOut = () => {
         },
         { withCredentials: true },
       );
-
+      console.log(res.data);
       if (res.data.success) {
+        dispatch(addMyOrders(res.data.newOrder));
         navigate("/order-placed");
       }
     } catch (error) {

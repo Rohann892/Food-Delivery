@@ -23,7 +23,7 @@ const shopOrderSchema = new mongoose.Schema({
     subtotal: Number,
     status: {
         type: String,
-        enum: ['pending', 'preparing', 'out for delivey', 'delivered'],
+        enum: ['pending', 'preparing', 'out for delivery', 'delivered'],
         default: "pending",
     },
     shopOrderItems: [shopOrderItemSchema]
@@ -36,7 +36,7 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    paymentMehthod: {
+    paymentMethod: {
         type: String,
         enum: ['cod', 'online'],
         required: true
@@ -55,4 +55,4 @@ const orderSchema = new mongoose.Schema({
 
 
 const Order = mongoose.model('Order', orderSchema);
-export default Order;
+export default Order; 
