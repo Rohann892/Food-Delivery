@@ -17,12 +17,14 @@ import CheckOut from "./pages/CheckOut";
 import OrderPlaced from "./pages/OrderPlaced";
 import MyOrder from "./pages/MyOrder";
 import useGetMyOrder from "./hooks/useGetMyOrder";
+import useUpdateLocation from "./hooks/useUpdateLocation";
 
 function App() {
   useGetCurrentUser();
   useGetCity();
   useGetMyShop();
   useGetMyOrder();
+  useUpdateLocation();
   const { userData } = useSelector((state) => state.user);
   return (
     <>

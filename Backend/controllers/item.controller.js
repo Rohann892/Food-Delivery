@@ -99,7 +99,7 @@ export const editItem = async (req, res) => {
             foodType,
             price,
             ...(image && { image })
-        }, { new: true })
+        }, { returnDocument: 'after' })
 
         if (!item) {
             return res.status(400).json({

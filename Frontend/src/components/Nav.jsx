@@ -177,15 +177,17 @@ const Nav = () => {
           </>
         ) : (
           <>
-            <div
-              className="relative cursor-pointer"
-              onClick={() => navigate("/cart")}
-            >
-              <FaCartShopping size={25} className="text-[#ff4d2d]" />
-              <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d]">
-                {cartItems.length}
-              </span>
-            </div>
+            {userData.role === "user" && (
+              <div
+                className="relative cursor-pointer"
+                onClick={() => navigate("/cart")}
+              >
+                <FaCartShopping size={25} className="text-[#ff4d2d]" />
+                <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d]">
+                  {cartItems.length}
+                </span>
+              </div>
+            )}
 
             <button
               className="hidden md:block px-3 py-1 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium"
@@ -196,30 +198,32 @@ const Nav = () => {
           </>
         )}
 
-        <div
-          className="w-[40px] h-[40px] rounded-full flex items-center justify-center bg-[#ff4d2d] text-white text-[18px] shadow-xl font-semibold cursor-pointer"
-          onClick={() => setActive((prev) => !prev)}
-        >
-          {userData?.fullName.slice(0, 1)}
-        </div>
-
-        {active && (
-          <div className="fixed top-[80px] right-[18px] md:right-[18%] lg:right-[25%] w-[180px] bg-white shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]">
-            <div className="text-[17px] font-semibold">{userData.fullName}</div>
-            <div
-              className="md:hidden text-[#ff4d2d] font-semibold cursor-pointer"
-              onClick={() => navigate("/my-orders")}
-            >
-              My Orders
-            </div>
-            <div
-              className="text-[#ff4d2d] font-semibold cursor-pointer"
-              onClick={handleLogOut}
-            >
-              log out
-            </div>
+        <div className="relative">
+          <div
+            className="w-[40px] h-[40px] rounded-full flex items-center justify-center bg-[#ff4d2d] text-white text-[18px] shadow-xl font-semibold cursor-pointer"
+            onClick={() => setActive((prev) => !prev)}
+          >
+            {userData?.fullName.slice(0, 1)}
           </div>
-        )}
+
+          {active && (
+            <div className="absolute top-[50px] right-0 w-[180px] bg-white shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]">
+              <div className="text-[17px] font-semibold">{userData.fullName}</div>
+              <div
+                className="md:hidden text-[#ff4d2d] font-semibold cursor-pointer"
+                onClick={() => navigate("/my-orders")}
+              >
+                My Orders
+              </div>
+              <div
+                className="text-[#ff4d2d] font-semibold cursor-pointer"
+                onClick={handleLogOut}
+              >
+                log out
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

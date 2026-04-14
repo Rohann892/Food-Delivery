@@ -51,7 +51,7 @@ export const createShop = async (req, res) => {
                 state,
                 address,
                 image
-            }, { new: true, returnDocument: 'after' })
+            }, { returnDocument: 'after' })
         }
 
         // Populate regardless of create or update

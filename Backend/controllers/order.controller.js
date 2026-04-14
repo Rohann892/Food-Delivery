@@ -1,3 +1,4 @@
+import DeliveryAssignment from "../models/deliveryAssignment.modal.js";
 import Order from "../models/order.modal.js";
 import Shop from "../models/shop.modal.js";
 import User from "../models/user.model.js";
@@ -155,12 +156,66 @@ export const updateOrderStatus = async (req, res) => {
         }
 
         shopOrder.status = status;
-        await order.save(); // ✅ Save parent, not subdocument
+        let deliveryBoysPayload = [];
+        if (status === 'out for delivery' && !shopOrder.assignment) {
+            const { longitude, latitude } = order.deliveryAddress;
+            const nearByDeliveryBoy = await User.find({
+                role: "delivery-boy",
+                location: {
+                    $near: {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: [Number(longitude), Number(latitude)]
+                        },
+                        $maxDistance: 5000
+                    }
+                }
+            })
+            const nearByIds = nearByDeliveryBoy.map(b => b._id);
+            const busyIds = await DeliveryAssignment.find({
+                assignedTo: { $in: nearByIds },
+                status: { $nin: ['broadcasted', 'completed'] }
+            }).distinct("assignedTo")
+            const busyIdSet = new Set(busyIds.map(id => String(id)));
 
+            const avalibleBoys = nearByDeliveryBoy.filter(b => !busyIdSet.has(String(b._id)));
+            const candidates = avalibleBoys.map(b => b._id);
+            if (candidates.length === 0) {
+                await order.save();
+                return res.status(200).json({
+                    success: true,
+                    message: 'Order status updated but no delivery boy available at this time',
+                    shopOrder,
+                })
+            }
+            const deliveryAssignment = await DeliveryAssignment.create({
+                order: orderId,
+                shop: shopOrder.shop,
+                shopOrderId: shopOrder._id,
+                broadCastedTo: candidates,
+                status: "broadcasted"
+            })
+            shopOrder.assignedDeliveryBoy = deliveryAssignment.assignedTo;
+            shopOrder.assignment = deliveryAssignment._id;
+            deliveryBoysPayload = avalibleBoys.map(b => ({
+                id: b._id,
+                fullName: b.fullName,
+                longitude: b.location.coordinates[0],
+                latitude: b.location.coordinates[1],
+                mobile: b.mobile,
+            }))
+        }
+        await order.save();
+        await order.populate("shopOrders.shop", "name");
+        await order.populate("shopOrders.assignedDeliveryBoy", "name email mobile");
+
+        const updatedShopOrder = order.shopOrders.find(o => o._id.toString() === shopId.toString());
         return res.status(200).json({
             success: true,
-            message: 'Status updated',
-            status: shopOrder.status
+            shopOrder: updatedShopOrder,
+            assignedDeliveryBoy: updatedShopOrder.assignedDeliveryBoy || null,
+            avaliableBoys: deliveryBoysPayload,
+            assignment: updatedShopOrder.assignment || null,
         });
 
     } catch (error) {
@@ -170,3 +225,38 @@ export const updateOrderStatus = async (req, res) => {
         });
     }
 };
+
+
+export const getDeliveryBoyAssignment = async (req, res) => {
+    try {
+        const deliveryBoyId = req.user;
+        const assignments = await DeliveryAssignment.find({
+            broadCastedTo: deliveryBoyId,
+            status: "broadcasted"
+        }).populate("order").populate('shop');
+        if (!assignments) {
+            return res.status(200).json({
+                message: 'no assignment'
+            })
+        }
+
+        const formatted = assignments.map(a => ({
+            assignemetId: a._id,
+            orderId: a.order._id,
+            shopName: a.shop.name,
+            deliveryAddress: a.order.deliveryAddress,
+            items: a.order.shopOrders.find(so => so._id.toString() === a.shopOrderId.toString())?.shopOrderItems || [],
+            subtotal: a.order.shopOrders.find(so => so._id.toString() === a.shopOrderId.toString())?.subtotal
+        }))
+
+        return res.status(200).json({
+            success: true,
+            formatted,
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'get assignment error'
+        })
+    }
+} 

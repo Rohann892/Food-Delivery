@@ -1,8 +1,14 @@
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { FaPhoneAlt } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { updateOrderStatus } from "../Redux/userSlice";
 
 const OwnerOrderCard = ({ data }) => {
+  const [avaliableDeliveryBoys, setAvaliableDeliveryBoys] = useState([]);
+  console.log(avaliableDeliveryBoys);
+
+  const dispatch = useDispatch();
   const formatedData = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-GB", {
@@ -22,6 +28,8 @@ const OwnerOrderCard = ({ data }) => {
         },
       );
       console.log(res.data);
+      setAvaliableDeliveryBoys(res.data.avaliableBoys);
+      dispatch(updateOrderStatus({ orderId, shopId, status }));
     } catch (error) {
       console.log(error);
     }
@@ -114,6 +122,20 @@ const OwnerOrderCard = ({ data }) => {
           <option value="out for delivery">Out for Delivery</option>
         </select>
       </div>
+      {data.shopOrders[0]?.status === "out for delivery" && (
+        <div className="mt-3 p-2 border rounded-lg text-sm bg-orange-50 gap-4">
+          <p>Avaliable Delievery Boys</p>
+          {avaliableDeliveryBoys?.length > 0 ? (
+            avaliableDeliveryBoys?.map((b, index) => (
+              <div key={index} className="text-gray-500">
+                {b.fullName}-{b.mobile}
+              </div>
+            ))
+          ) : (
+            <p>Waiting for avaliable delivery boys</p>
+          )}
+        </div>
+      )}
       <div>Total: ₹{data.shopOrders[0].subtotal}</div>
     </div>
   );
