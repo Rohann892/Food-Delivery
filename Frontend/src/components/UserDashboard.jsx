@@ -9,6 +9,8 @@ import useGetShopByCity from "../hooks/useGetShopByCity";
 import useGetCity from "../hooks/useGetCity";
 import useGetItemByCity from "../hooks/useGetItemByCity";
 import FoodCart from "./FoodCart";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const UserDashboard = () => {
   useGetCity();
@@ -17,15 +19,29 @@ const UserDashboard = () => {
   const cateScrollRef = useRef();
   const shopScrollRef = useRef();
   const itemScrollRef = useRef();
-  const { city, shopInMyCity, itemsInCity } = useSelector(
+  const { city, shopInMyCity, itemsInCity, searchItems } = useSelector(
     (state) => state.user,
   );
+
+  const navigate = useNavigate();
   const [showLeftCateButton, setShowLeftCateButton] = useState(false);
   const [showRightCateButton, setShowRightCateButton] = useState(false);
   const [showLeftShopButton, setShowLeftShopButton] = useState(false);
   const [showRightShopButton, setShowRightShopButton] = useState(false);
   const [showItemLeftButton, setShowItemLeftButton] = useState(false);
   const [showItemRightButton, setShowItemRightButton] = useState(false);
+  const [upadatedItemList, setUpdatedItemList] = useState(itemsInCity);
+
+  const handleFilterItemByCategory = (category) => {
+    if (category === "All") {
+      setUpdatedItemList(itemsInCity);
+    } else {
+      const filteredItems = itemsInCity.filter(
+        (item) => item.category === category,
+      );
+      setUpdatedItemList(filteredItems);
+    }
+  };
 
   const updateButton = (ref, setShowLeftButton, setShowRightButton) => {
     const element = ref.current;
@@ -45,6 +61,10 @@ const UserDashboard = () => {
       });
     }
   };
+
+  useEffect(() => {
+    setUpdatedItemList(itemsInCity);
+  }, [itemsInCity]);
 
   useEffect(() => {
     const element = cateScrollRef.current;
@@ -96,6 +116,21 @@ const UserDashboard = () => {
   return (
     <div className="w-screen min-h-screen flex flex-col justify-center items-center gap-5 overflow-y-auto bg-[#fff9f6]">
       <Nav />
+
+      {searchItems && searchItems.length > 0 && (
+        <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-5 bg-white shadow-lg rounded-2xl mt-4">
+          <h1 className="text-gray-900 text-2xl sm:text-3xl font-semibold border-b border-gray-200 pb-2 w-full">
+            Search Results found ({searchItems.length})
+          </h1>
+          <div className="w-full flex flex-col items-center sm:items-start md:flex-row md:flex-wrap gap-6">
+            {searchItems.map((item, index) => (
+              <div key={index} className="transition-transform duration-300 hover:-translate-y-2">
+                <FoodCart data={item} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Inspiration for your first order
@@ -118,6 +153,7 @@ const UserDashboard = () => {
                 name={cate.category}
                 image={cate.image}
                 key={index}
+                onClick={() => handleFilterItemByCategory(cate.category)}
               />
             ))}
           </div>
@@ -149,7 +185,12 @@ const UserDashboard = () => {
             ref={shopScrollRef}
           >
             {shopInMyCity?.map((shop, index) => (
-              <CategoryCard name={shop.name} image={shop.image} key={index} />
+              <CategoryCard
+                name={shop.name}
+                image={shop.image}
+                key={index}
+                onClick={() => navigate(`/shop/${shop._id}`)}
+              />
             ))}
           </div>
           {showRightShopButton && (
@@ -168,7 +209,7 @@ const UserDashboard = () => {
           Suggested Food Items
         </h1>
         <div className="w-full h-auto flex flex-wrap gap-[20px] justify-center">
-          {itemsInCity?.map((item, index) => (
+          {upadatedItemList?.map((item, index) => (
             <FoodCart key={index} data={item} />
           ))}
         </div>

@@ -3,6 +3,7 @@ import DeliveryAssignment from "../models/deliveryAssignment.modal.js";
 import Order from "../models/order.modal.js";
 import Shop from "../models/shop.modal.js";
 import User from "../models/user.model.js";
+import { sendDeliveryOtp } from "../utils/mail.js";
 
 export const placeOrder = async (req, res) => {
     try {
@@ -21,7 +22,7 @@ export const placeOrder = async (req, res) => {
         }
         const groupItemsByShop = {}
         cartItems.forEach(item => {
-            const shopId = item.shop
+            const shopId = item.shop?._id || item.shop
             if (!groupItemsByShop[shopId]) {
                 groupItemsByShop[shopId] = [];
             }
@@ -42,7 +43,7 @@ export const placeOrder = async (req, res) => {
                 owner: shop.owner._id,
                 subtotal,
                 shopOrderItems: items.map((i) => ({
-                    item: i.id,
+                    item: i._id,
                     price: i.price,
                     quantity: i.quantity,
                     name: i.name,
@@ -69,10 +70,10 @@ export const placeOrder = async (req, res) => {
             newOrder,
         })
     } catch (error) {
-
+        console.log(error)
         return res.status(500).json({
             success: false,
-            messga: error.message
+            message: `place order error ${error.message}`
         })
     }
 }
@@ -324,7 +325,7 @@ export const acceptOrder = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'accept order error'
+            message: `accept order error ${error.message}`
         })
     }
 }
@@ -433,5 +434,97 @@ export const getOrderById = async (req, res) => {
             success: false,
             message: `get order by id error ${error.message}`
         })
+    }
+}
+
+
+export const sendOtp = async (req, res) => {
+    try {
+        const { orderId, shopOrderId } = req.body;
+        const order = await Order.findById(orderId).populate("user", "email fullName");
+        if (!order) {
+            return res.status(400).json({
+                success: false,
+                message: 'order not found'
+            })
+        }
+
+        const shopOrder = order.shopOrders.id(shopOrderId);
+        if (!shopOrder) {
+            return res.status(400).json({
+                success: false,
+                message: 'shop order not found'
+            })
+        }
+
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        shopOrder.deliveryOtp = otp;
+        shopOrder.otpExpires = Date.now() + 5 * 60 * 1000;
+        await order.save();
+        await sendDeliveryOtp(order.user.email, otp);
+        return res.status(200).json({
+            success: true,
+            message: `otp sent successfully to ${order.user.fullName}`
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: `send otp error ${error.message}`
+        })
+    }
+}
+
+
+export const verifyDeliveryOtp = async (req, res) => {
+    try {
+        const { orderId, shopOrderId, otp } = req.body;
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(400).json({
+                success: false,
+                message: 'enter valid order id'
+            });
+        }
+
+        const shopOrder = order.shopOrders.id(shopOrderId);
+        if (!shopOrder) {
+            return res.status(400).json({
+                success: false,
+                message: 'enter valid shop order id'
+            });
+        }
+
+        if (!shopOrder.deliveryOtp || shopOrder.deliveryOtp !== String(otp) || !shopOrder.otpExpires || shopOrder.otpExpires < Date.now()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid/Expired otp has been entered'
+            });
+        }
+
+        shopOrder.status = 'delivered';
+        shopOrder.deliveredAt = Date.now();
+        shopOrder.deliveryOtp = undefined;
+        shopOrder.otpExpires = undefined;
+
+        await order.save();
+
+        await DeliveryAssignment.deleteOne({
+            shopOrderId: shopOrder._id,
+            order: order._id,
+            assignedTo: shopOrder.assignedDeliveryBoy
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'otp verified successfully'
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: `verify otp error ${error.message}`
+        });
     }
 }

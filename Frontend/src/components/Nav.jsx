@@ -6,9 +6,10 @@ import { RxCross2 } from "react-icons/rx";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { setUserData, setCity } from "../Redux/userSlice";
+import { setUserData, setCity, setSerachItems } from "../Redux/userSlice";
 import { FaPlus } from "react-icons/fa6";
 import { IoReceipt } from "react-icons/io5";
+import { useEffect } from "react";
 
 // Common cities in India
 const COMMON_CITIES = [
@@ -31,7 +32,9 @@ const Nav = () => {
   const [active, setActive] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const { city } = useSelector((state) => state.user);
+  const [query, setQuery] = useState("");
+
+  const { city, searchItems } = useSelector((state) => state.user);
   const { myShopData } = useSelector((state) => state.owner);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -54,6 +57,31 @@ const Nav = () => {
     dispatch(setCity(selectedCity));
     setShowLocationModal(false);
   };
+
+  const handleSearchItem = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/item/search-item?query=${query}&city=${city}`,
+        {
+          withCredentials: true,
+        },
+      );
+      console.log(res.data.items);
+      dispatch(setSerachItems(res.data.items));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!query) {
+      dispatch(setSerachItems(null));
+    }
+    const debouncedTime = setTimeout(() => {
+      handleSearchItem();
+    }, 300);
+    return () => clearTimeout(debouncedTime);
+  }, [query]);
 
   return (
     <div className="w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6]">
@@ -108,6 +136,8 @@ const Nav = () => {
                 type="text"
                 placeholder="search foods..."
                 className="text-gray-700 outline-0 w-full text-sm bg-transparent"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
               />
             </div>
           </div>
@@ -131,6 +161,8 @@ const Nav = () => {
               type="text"
               placeholder="search for delicious foods..."
               className="px-[10px] text-gray-700 outline-0 w-full"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>
@@ -208,7 +240,9 @@ const Nav = () => {
 
           {active && (
             <div className="absolute top-[50px] right-0 w-[180px] bg-white shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]">
-              <div className="text-[17px] font-semibold">{userData.fullName}</div>
+              <div className="text-[17px] font-semibold">
+                {userData.fullName}
+              </div>
               <div
                 className="md:hidden text-[#ff4d2d] font-semibold cursor-pointer"
                 onClick={() => navigate("/my-orders")}

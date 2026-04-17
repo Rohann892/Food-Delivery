@@ -36,9 +36,7 @@ const TrackOrder = () => {
           onClick={() => navigate("/my-orders")}
         >
           <IoMdArrowBack size={28} className="text-[#ff4d2d]" />
-          <h1 className="text-2xl font-bold text-gray-800">
-            Track Your Order
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800">Track Your Order</h1>
         </div>
 
         {/* Shop Orders */}
@@ -79,7 +77,8 @@ const TrackOrder = () => {
                 {shopOrder?.assignedDeliveryBoy ? (
                   <div className="bg-green-50 rounded-xl p-3 space-y-1">
                     <p className="text-sm font-semibold text-green-700">
-                      🛵 Delivery Boy: {shopOrder?.assignedDeliveryBoy?.fullName}
+                      🛵 Delivery Boy:{" "}
+                      {shopOrder?.assignedDeliveryBoy?.fullName}
                     </p>
                     <p className="text-sm text-gray-600">
                       📞 Contact: {shopOrder?.assignedDeliveryBoy?.mobile}
@@ -98,24 +97,25 @@ const TrackOrder = () => {
             )}
 
             {/* Map */}
-            {shopOrder.assignedDeliveryBoy && (
-              <div className="h-[400px] w-full rounded-2xl overflow-hidden shadow-md border">
-                <DeliveryBoyTracking
-                  data={{
-                    deliveryBoyLocation: {
-                      lat: shopOrder?.assignedDeliveryBoy?.location
-                        ?.coordinates?.[1],
-                      lon: shopOrder?.assignedDeliveryBoy?.location
-                        ?.coordinates?.[0],
-                    },
-                    customerLocation: {
-                      lat: currentOrder?.deliveryAddress?.latitude,
-                      lon: currentOrder?.deliveryAddress?.longitude,
-                    },
-                  }}
-                />
-              </div>
-            )}
+            {shopOrder.assignedDeliveryBoy &&
+              shopOrder.status !== "delivered" && (
+                <div className="h-[400px] w-full rounded-2xl overflow-hidden shadow-md border">
+                  <DeliveryBoyTracking
+                    data={{
+                      deliveryBoyLocation: {
+                        lat: shopOrder?.assignedDeliveryBoy?.location
+                          ?.coordinates?.[1],
+                        lon: shopOrder?.assignedDeliveryBoy?.location
+                          ?.coordinates?.[0],
+                      },
+                      customerLocation: {
+                        lat: currentOrder?.deliveryAddress?.latitude,
+                        lon: currentOrder?.deliveryAddress?.longitude,
+                      },
+                    }}
+                  />
+                </div>
+              )}
           </div>
         ))}
       </div>

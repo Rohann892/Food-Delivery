@@ -9,7 +9,9 @@ const DeliveryBoyDashboard = () => {
   const [avaliableAssigments, setAvaliableAssignments] = useState(null);
   const [currentOrder, setCurentOrder] = useState(null);
   const [showOtpBox, setShowOtpBox] = useState(false);
+  const [otp, setOtp] = useState("");
   const { userData } = useSelector((state) => state.user);
+
   const handleGetAssignment = async () => {
     try {
       const res = await axios.get(
@@ -33,6 +35,37 @@ const DeliveryBoyDashboard = () => {
       );
       console.log(res.data);
       setCurentOrder(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handeSendDeliveryOtp = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/order/send-delivery-otp`,
+        { orderId: currentOrder._id, shopOrderId: currentOrder.shopOrder._id },
+        { withCredentials: true },
+      );
+      setShowOtpBox((prev) => !prev);
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/order/verify-delivery-otp`,
+        {
+          orderId: currentOrder._id,
+          shopOrderId: currentOrder.shopOrder._id,
+          otp,
+        },
+        { withCredentials: true },
+      );
+      console.log(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -128,7 +161,7 @@ const DeliveryBoyDashboard = () => {
           {!showOtpBox ? (
             <button
               className="mt-4 w-full bg-green-500 text-white font-semiboldpy-2 px-4 rounded-xl shadow-md hover:bg-green-600 transition-all cursor-pointer active:scale-95"
-              onClick={() => setShowOtpBox((prev) => !prev)}
+              onClick={() => handeSendDeliveryOtp()}
             >
               Mark as Delivered
             </button>
@@ -144,10 +177,14 @@ const DeliveryBoyDashboard = () => {
                 <div className="flex flex-col items-center justify-center gap-2">
                   <input
                     type="text"
+                    onChange={(e) => setOtp(e.target.value)}
                     placeholder="Enter the otp"
                     className="w-full border px-3 py-2 rounded-lg mb-3 focus:outline-none focus:border-[#ff4d2d]"
                   />
-                  <button className="w-full bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition cursor-pointer text-base text-white">
+                  <button
+                    className="w-full bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition cursor-pointer text-base text-white"
+                    onClick={() => verifyOtp()}
+                  >
                     Verify
                   </button>
                 </div>

@@ -218,3 +218,75 @@ export const getItemByCity = async (req, res) => {
         })
     }
 }
+
+
+export const getItemByShop = async (req, res) => {
+    try {
+        const { shopId } = req.params;
+        const shop = await Shop.findById(shopId).populate("items");
+        if (!shop) {
+            return res.status(400).json({
+                success: false,
+                message: 'shop not found'
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: 'items found successfully',
+            shop,
+            items: shop.items
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: `get item by shop error ${error.message}`
+        })
+    }
+}
+
+
+
+export const searchItem = async (req, res) => {
+    try {
+        const { query, city } = req.query;
+        if (!query || !city) {
+            return res.status(400).json({
+                success: false,
+                message: 'no queries found to search for'
+            })
+        }
+
+        const shop = await Shop.find({
+            city: { $regex: new RegExp(`^${city}$`) } // regex for case insensitive search
+        }).populate('items')
+
+        if (!shop) {
+            return res.status(400).json({
+                success: false,
+                message: 'shop not found'
+            })
+        }
+
+        const shopIds = shop.map((shop) => shop._id);
+        const items = await Item.find({
+            shop: { $in: shopIds },
+            $or: [
+                { name: { $regex: query, $options: "i" } },
+                { category: { $regex: query, $options: "i" } },
+                { foodType: { $regex: query, $options: "i" } },
+            ]
+        }).populate("shop", "name image");
+        return res.status(200).json({
+            success: true,
+            message: 'items found successfully',
+            items
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: true,
+            message: `search item error ${error.message}`
+        })
+    }
+}
