@@ -86,13 +86,62 @@ const CheckOut = () => {
         { withCredentials: true },
       );
       console.log(res.data);
-      if (res.data.success) {
+      if (paymentMethod === "cod") {
         dispatch(addMyOrders(res.data.newOrder));
         navigate("/order-placed");
+      } else {
+        const orderId = res.data.orderId;
+        const razorOrder = res.data.razorOrder;
+        openRazorpayWindow(orderId, razorOrder);
       }
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const openRazorpayWindow = (orderId, razorOrder) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_API_KEY,
+      amount: razorOrder.amount,
+      currency: "INR",
+      name: "Food Delivery",
+      description: "Online Food Order",
+      image: "",
+      order_id: razorOrder.id,
+      handler: async function (response) {
+        try {
+          const res = await axios.post(
+            `http://localhost:8000/api/order/verify-payment`,
+            {
+              razorpayPaymentId: response.razorpay_payment_id,
+              orderId,
+            },
+            {
+              withCredentials: true,
+            },
+          );
+          console.log(res.data);
+          dispatch(addMyOrders(res.data.order));
+          navigate("/order-placed");
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      prefill: {
+        name: userData.name,
+        email: userData.email,
+        contact: userData.phone,
+      },
+      notes: {
+        address: addressInput,
+      },
+      theme: {
+        color: "#ff4d2d",
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   useEffect(() => {
