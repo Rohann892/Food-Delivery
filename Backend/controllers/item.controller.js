@@ -290,3 +290,48 @@ export const searchItem = async (req, res) => {
         })
     }
 }
+
+
+
+export const rating = async (req, res) => {
+    try {
+        const { itemId, rating } = req.body;
+        if (!itemId || rating) {
+            return res.status(400).json({
+                success: false,
+                message: 'itemId and rating are required'
+            })
+        }
+
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: 'Rating must be between 1 to 5'
+            })
+        }
+        const item = await Item.findById(itemId);
+        if (!item) {
+            return res.status(400).json({
+                success: false,
+                message: 'item not found'
+            })
+        }
+
+        const newCount = item.rating.count + 1;
+        const newAverage = (item.rating.totalRating * item.rating.count + rating) / newCount;
+        await item.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'rating added successfully',
+            rating: item.rating
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}

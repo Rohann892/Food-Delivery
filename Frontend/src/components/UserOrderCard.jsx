@@ -1,8 +1,13 @@
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CiStar } from "react-icons/ci";
+import { FaStar } from "react-icons/fa6";
+import { GiHangGlider } from "react-icons/gi";
 
 const UserOrderCard = ({ data }) => {
   const navigate = useNavigate();
+  const [selectedRating, setSelectedRating] = useState({});
   const formatedData = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-GB", {
@@ -10,6 +15,19 @@ const UserOrderCard = ({ data }) => {
       month: "short",
       year: "numeric",
     });
+  };
+
+  const handleRating = async (itemId, rating) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/item/rating`,
+        { itemId, rating },
+        { withCredentials: true },
+      );
+      setSelectedRating((prev) => ({ ...prev, [itemId]: rating }));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -59,6 +77,19 @@ const UserOrderCard = ({ data }) => {
                 <p className="text-xs text-gray-500">
                   Qty: {i.quantity} x ₹{i.price}
                 </p>
+                {shopOrder.status === "delivered" && (
+                  <div className="flex space-x-1 mt-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        className={`${selectedRating[i.item._id] >= star ? "text-yellow-500" : "text-gray-300"}`}
+                        onClick={() => handleRating(i.item._id, star)}
+                      >
+                        ⭐
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

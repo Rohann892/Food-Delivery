@@ -76,6 +76,7 @@ const Nav = () => {
   useEffect(() => {
     if (!query) {
       dispatch(setSerachItems(null));
+      return;
     }
     const debouncedTime = setTimeout(() => {
       handleSearchItem();

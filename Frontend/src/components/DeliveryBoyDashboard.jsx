@@ -5,12 +5,26 @@ import axios from "axios";
 import { TbAwardOff } from "react-icons/tb";
 import DeliveryBoyTracking from "./DeliveryBoyTracking";
 import { Socket } from "socket.io-client";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const DeliveryBoyDashboard = () => {
   const [avaliableAssigments, setAvaliableAssignments] = useState(null);
   const [currentOrder, setCurentOrder] = useState(null);
   const [showOtpBox, setShowOtpBox] = useState(false);
   const [otp, setOtp] = useState("");
+  const [deliveryBoyLocation, setDeliveryBoyLocation] = useState(null);
+  const [todayDelivery, setTodayDelivery] = useState([]);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const { userData, socket } = useSelector((state) => state.user);
 
   const handleGetAssignment = async () => {
@@ -42,6 +56,7 @@ const DeliveryBoyDashboard = () => {
   };
 
   const handeSendDeliveryOtp = async () => {
+    setIsSendingOtp(true);
     try {
       const res = await axios.post(
         `http://localhost:8000/api/order/send-delivery-otp`,
@@ -52,10 +67,13 @@ const DeliveryBoyDashboard = () => {
       console.log(res.data);
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
   const verifyOtp = async () => {
+    setIsVerifyingOtp(true);
     try {
       const res = await axios.post(
         `http://localhost:8000/api/order/verify-delivery-otp`,
@@ -67,8 +85,13 @@ const DeliveryBoyDashboard = () => {
         { withCredentials: true },
       );
       console.log(res.data);
+      if (res.data.success) {
+        window.location.reload();
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -86,6 +109,50 @@ const DeliveryBoyDashboard = () => {
     }
   };
 
+  const handleTodayDelivey = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/order/get-today-deliveries`,
+        { withCredentials: true },
+      );
+      console.log(res.data);
+      setTodayDelivery(res.data.formatted);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!socket || userData.role !== "delivery-boy") return;
+
+    let watchId;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          setDeliveryBoyLocation({ lat: latitude, lon: longitude });
+          socket.emit("updatedLocation", {
+            latitude,
+            longitude,
+            userId: userData._id,
+          });
+        },
+        (error) => {
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: true,
+        },
+      );
+    }
+    return () => {
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [socket]);
+
   useEffect(() => {
     socket.on("newAssignment", (data) => {
       if (data.sentTo === userData._id) {
@@ -100,6 +167,7 @@ const DeliveryBoyDashboard = () => {
   useEffect(() => {
     handleGetAssignment();
     getCurrentOrder();
+    handleTodayDelivey();
   }, [userData]);
   return (
     <div className="w-screen h-min-screen flex flex-col items-center justify-center">
@@ -118,6 +186,27 @@ const DeliveryBoyDashboard = () => {
           </p>
         </div>
       </div>
+
+      <div className="bg-white rounded-2xl shadow-md p-5 w-[95%] mb-6 border border-orange-500">
+        <h1 className="text-lg font-bold mb-3 text-[#ff4d2d]">
+          Today's Delivery
+        </h1>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={todayDelivery}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="hour" tickFormatter={(h) => `${h}:00`} />
+            <YAxis allowDecimals={false} />
+            <Tooltip
+              formatter={(value) => [value, "orders"]}
+              labelFormatter={(label) => `${label}:00`}
+            />
+            <Legend />
+            <Bar dataKey="count" fill="#ff4d2d" />
+          </BarChart>
+        </ResponsiveContainer>
+        <div></div>
+      </div>
+
       {!currentOrder && (
         <div className="bg-white rounded-2xl p-5 shadow-md w-[90%] border border-orange-100 mt-5">
           <h1 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -169,13 +258,23 @@ const DeliveryBoyDashboard = () => {
               {currentOrder?.shopOrder.subtotal}
             </p>
           </div>
-          <DeliveryBoyTracking data={currentOrder} />
+          <DeliveryBoyTracking
+            data={{
+              deliveryBoyLocation: deliveryBoyLocation ||
+                currentOrder.deliveryBoyLocation || {
+                  lat: userData?.location?.coordinates?.[1],
+                  lon: userData?.location?.coordinates?.[0],
+                },
+              customerLocation: currentOrder.customerLocation,
+            }}
+          />
           {!showOtpBox ? (
             <button
-              className="mt-4 w-full bg-green-500 text-white font-semiboldpy-2 px-4 rounded-xl shadow-md hover:bg-green-600 transition-all cursor-pointer active:scale-95"
+              className={`mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:bg-green-600 transition-all cursor-pointer active:scale-95 flex justify-center items-center ${isSendingOtp ? "opacity-70 cursor-not-allowed" : ""}`}
               onClick={() => handeSendDeliveryOtp()}
+              disabled={isSendingOtp}
             >
-              Mark as Delivered
+              {isSendingOtp ? "Sending OTP..." : "Mark as Delivered"}
             </button>
           ) : (
             <div className="mt-4 p-4 border rounded-xl bg-gray-100">
@@ -194,10 +293,11 @@ const DeliveryBoyDashboard = () => {
                     className="w-full border px-3 py-2 rounded-lg mb-3 focus:outline-none focus:border-[#ff4d2d]"
                   />
                   <button
-                    className="w-full bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition cursor-pointer text-base text-white"
+                    className={`w-full bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition cursor-pointer text-base text-white flex justify-center items-center ${isVerifyingOtp ? "opacity-70 cursor-not-allowed" : ""}`}
                     onClick={() => verifyOtp()}
+                    disabled={isVerifyingOtp}
                   >
-                    Verify
+                    {isVerifyingOtp ? "Verifying..." : "Verify"}
                   </button>
                 </div>
               </div>

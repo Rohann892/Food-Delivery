@@ -6,7 +6,7 @@ import User from "../models/user.model.js";
 import { sendDeliveryOtp } from "../utils/mail.js";
 import RazorPay from "razorpay";
 import dotenv from 'dotenv'
-import { app } from "../../Frontend/firebase.js";
+
 dotenv.config()
 
 let instance = new RazorPay({
@@ -327,7 +327,7 @@ export const updateOrderStatus = async (req, res) => {
             await deliveryAssignment.populate('order');
             await deliveryAssignment.populate('shop');
 
-            const io = app.get("io");
+            const io = req.app.get("io");
             if (io) {
                 avalibleBoys.forEach(boy => {
                     const boySocketId = boy.socketId;
@@ -680,3 +680,56 @@ export const verifyDeliveryOtp = async (req, res) => {
         });
     }
 }
+
+export const getTodayDeliveries = async (req, res) => {
+    try {
+        const deliveryBoyId = req.user;
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const orders = await Order.find({
+            "shopOrders.assignedDeliveryBoy": deliveryBoyId,
+            "shopOrders.status": "delivered",
+            "shopOrders.deliveredAt": { $gte: startOfDay }
+        }).lean();
+
+        let todayDeliveries = [];
+
+        orders.forEach(order => {
+            order.shopOrders.forEach(shopOrder => {
+                if (
+                    shopOrder.assignedDeliveryBoy.toString() === deliveryBoyId.toString() &&
+                    shopOrder.status === "delivered" &&
+                    shopOrder.deliveredAt &&
+                    shopOrder.deliveredAt >= startOfDay
+                ) {
+                    todayDeliveries.push(shopOrder);
+                }
+            });
+        });
+
+        let stats = {};
+        todayDeliveries.forEach(shopOrder => {
+            const hour = new Date(shopOrder.deliveredAt).getHours();
+            stats[hour] = (stats[hour] || 0) + 1;
+        })
+
+        let formattedStats = Object.keys(stats).map(hour => ({
+            hour: parseInt(hour),
+            count: stats[hour]
+        })).sort((a, b) => a.hour - b.hour);
+
+        return res.status(200).json({
+            success: true,
+            data: todayDeliveries,
+            formatted: formattedStats
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: `get today deliveries error ${error.message}`
+        });
+    }
+};

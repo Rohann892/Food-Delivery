@@ -6,12 +6,39 @@ export const socketHandler = (io) => {
 
         socket.on('identity', async ({ userId }) => {
             try {
-                const user = await User.findByIdAndUpdate(userId, { socketId: socket.id, isOnline: true }, { new: true })
+                const user = await User.findByIdAndUpdate(userId, { socketId: socket.id, isOnline: true }, { returnDocument: 'after' })
                 console.log('user identity', user)
             } catch (error) {
                 console.log(error)
             }
         })
+
+
+
+        socket.on('updatedLocation', async ({ latitude, longitude, userId }) => {
+            try {
+                const user = await User.findByIdAndUpdate(userId, {
+                    location: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    },
+                    isOnline: true,
+                    socketId: socket.id
+                }, { returnDocument: 'after' })
+
+                if (user) {
+                    io.emit('updatedDeliveryLocation', {
+                        deliveryBoyId: userId,
+                        latitude,
+                        longitude,
+                    })
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+
 
         socket.on('disconnect', async () => {
             try {
