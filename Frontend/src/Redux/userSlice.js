@@ -97,8 +97,12 @@ const userSlice = createSlice({
         },
         setSocket: (state, action) => {
             state.socket = action.payload
+        },
+        clearCart: (state) => {
+            state.cartItems = []
+            state.totalAmount = null
         }
     }
 })
-export const { setUserData, setCurrentUserRole, setCity, setState, setCurentAddress, setShopInMyCity, setItemsInCity, addToCart, updateQuantity, removeFromCart, setMyOrders, addMyOrders, updateOrderStatus, setSerachItems, setSocket, updateRealTimeOrderStatus } = userSlice.actions
+export const { setUserData, setCurrentUserRole, setCity, setState, setCurentAddress, setShopInMyCity, setItemsInCity, addToCart, updateQuantity, removeFromCart, setMyOrders, addMyOrders, updateOrderStatus, setSerachItems, setSocket, updateRealTimeOrderStatus, clearCart } = userSlice.actions
 export default userSlice.reducer;

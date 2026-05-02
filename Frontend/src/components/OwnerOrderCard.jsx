@@ -116,7 +116,7 @@ const OwnerOrderCard = ({ data }) => {
                   className="flex flex-col shrink-0 w-[140px] border rounded-lg p-2 bg-white snap-start"
                 >
                   <img
-                    src={item.item?.image}
+                    src={item.image || item.item?.image}
                     alt={item.name}
                     className="w-full h-24 object-cover rounded"
                   />

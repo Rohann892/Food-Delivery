@@ -12,7 +12,7 @@ import axios from "axios";
 import { MdDeliveryDining } from "react-icons/md";
 import { GiSmartphone } from "react-icons/gi";
 import { FaCreditCard } from "react-icons/fa";
-import { addMyOrders } from "../Redux/userSlice";
+import { addMyOrders, clearCart } from "../Redux/userSlice";
 
 function RecenterMap({ location }) {
   const map = useMap();
@@ -88,6 +88,7 @@ const CheckOut = () => {
       console.log(res.data);
       if (paymentMethod === "cod") {
         dispatch(addMyOrders(res.data.newOrder));
+        dispatch(clearCart());
         navigate("/order-placed");
       } else {
         const orderId = res.data.orderId;
@@ -122,6 +123,7 @@ const CheckOut = () => {
           );
           console.log(res.data);
           dispatch(addMyOrders(res.data.order));
+          dispatch(clearCart());
           navigate("/order-placed");
         } catch (error) {
           console.log(error);

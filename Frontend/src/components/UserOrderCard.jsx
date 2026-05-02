@@ -69,7 +69,7 @@ const UserOrderCard = ({ data }) => {
                 className="flex flex-col shrink-0 w-40 border rounded-lg p-2 bg-white"
               >
                 <img
-                  src={i.item?.image}
+                  src={i.image || i.item?.image}
                   alt=""
                   className="w-full h-24 object-cover rounded"
                 />
