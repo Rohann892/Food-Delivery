@@ -56,7 +56,7 @@ const AddFoodItem = () => {
       formData.append("image", backendImage);
 
       const res = await axios.post(
-        `http://localhost:8000/api/item/add-item`,
+        `${import.meta.env.VITE_API_URL}/api/item/add-item`,
         formData,
         { withCredentials: true, timeout: 60000 },
       );

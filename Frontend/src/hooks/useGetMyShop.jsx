@@ -16,7 +16,7 @@ const useGetMyShop = () => {
 
     const getMyShop = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/shop/get-my`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/shop/get-my`, {
           withCredentials: true,
         });
         if (res.data.success && res.data.shop) {

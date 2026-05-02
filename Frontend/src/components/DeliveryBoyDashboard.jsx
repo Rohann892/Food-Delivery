@@ -30,7 +30,7 @@ const DeliveryBoyDashboard = () => {
   const handleGetAssignment = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/order/get-assignments`,
+        `${import.meta.env.VITE_API_URL}/api/order/get-assignments`,
         { withCredentials: true },
       );
       console.log(res.data.formatted);
@@ -45,7 +45,7 @@ const DeliveryBoyDashboard = () => {
   const getCurrentOrder = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/order/get-current-order`,
+        `${import.meta.env.VITE_API_URL}/api/order/get-current-order`,
         { withCredentials: true },
       );
       console.log(res.data);
@@ -59,7 +59,7 @@ const DeliveryBoyDashboard = () => {
     setIsSendingOtp(true);
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/order/send-delivery-otp`,
+        `${import.meta.env.VITE_API_URL}/api/order/send-delivery-otp`,
         { orderId: currentOrder._id, shopOrderId: currentOrder.shopOrder._id },
         { withCredentials: true },
       );
@@ -76,7 +76,7 @@ const DeliveryBoyDashboard = () => {
     setIsVerifyingOtp(true);
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/order/verify-delivery-otp`,
+        `${import.meta.env.VITE_API_URL}/api/order/verify-delivery-otp`,
         {
           orderId: currentOrder._id,
           shopOrderId: currentOrder.shopOrder._id,
@@ -98,7 +98,7 @@ const DeliveryBoyDashboard = () => {
   const handleAcceptOrder = async (assignmentId) => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/order/accept-order/${assignmentId}`,
+        `${import.meta.env.VITE_API_URL}/api/order/accept-order/${assignmentId}`,
         {},
         { withCredentials: true },
       );
@@ -112,7 +112,7 @@ const DeliveryBoyDashboard = () => {
   const handleTodayDelivey = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/order/get-today-deliveries`,
+        `${import.meta.env.VITE_API_URL}/api/order/get-today-deliveries`,
         { withCredentials: true },
       );
       console.log(res.data);

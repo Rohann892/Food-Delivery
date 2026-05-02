@@ -10,7 +10,7 @@ const useGetMyOrder = () => {
     const fetchOrder = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/order/my-orders`,
+          `${import.meta.env.VITE_API_URL}/api/order/my-orders`,
           { withCredentials: true },
         );
         console.log(res.data);

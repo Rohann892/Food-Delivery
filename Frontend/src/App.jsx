@@ -23,7 +23,7 @@ import Shop from "./pages/Shop";
 import { setSocket } from "./Redux/userSlice";
 import { io } from "socket.io-client";
 
-export const severUrl = "http://localhost:8000";
+export const severUrl = import.meta.env.VITE_API_URL;
 
 function App() {
   const dispatch = useDispatch();

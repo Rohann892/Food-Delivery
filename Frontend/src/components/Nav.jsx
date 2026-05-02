@@ -41,7 +41,7 @@ const Nav = () => {
 
   const handleLogOut = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/auth/logout`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
         withCredentials: true,
       });
       if (res.data.success) {
@@ -61,7 +61,7 @@ const Nav = () => {
   const handleSearchItem = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/item/search-item?query=${query}&city=${city}`,
+        `${import.meta.env.VITE_API_URL}/api/item/search-item?query=${query}&city=${city}`,
         {
           withCredentials: true,
         },

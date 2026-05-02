@@ -13,7 +13,7 @@ const useGetShopByCity = () => {
     const fetchShops = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/shop/get-by-city/${city}`,
+          `${import.meta.env.VITE_API_URL}/api/shop/get-by-city/${city}`,
           { withCredentials: true },
         );
         dispatch(setShopInMyCity(res.data.shops));

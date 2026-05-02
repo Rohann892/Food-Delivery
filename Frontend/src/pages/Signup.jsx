@@ -27,7 +27,7 @@ const Signup = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:8000/api/auth/signup`,
+        `${import.meta.env.VITE_API_URL}/api/auth/signup`,
         {
           fullName,
           email,
@@ -64,7 +64,7 @@ const Signup = () => {
     try {
       setLoading(true);
       const result = await axios.post(
-        `http://localhost:8000/api/auth/google-auth`,
+        `${import.meta.env.VITE_API_URL}/api/auth/google-auth`,
         {
           fullName: res.user.displayName,
           email: res.user.email,

@@ -16,7 +16,7 @@ const TrackOrder = () => {
   const handleGetOrderById = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/order/get-order-by-id/${orderId}`,
+        `${import.meta.env.VITE_API_URL}/api/order/get-order-by-id/${orderId}`,
         { withCredentials: true },
       );
       console.log(res.data.order);

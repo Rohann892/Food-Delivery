@@ -72,7 +72,7 @@ const CheckOut = () => {
   const handlePlaceOrder = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/order/place-order`,
+        `${import.meta.env.VITE_API_URL}/api/order/place-order`,
         {
           paymentMethod,
           deliveryAddress: {
@@ -112,7 +112,7 @@ const CheckOut = () => {
       handler: async function (response) {
         try {
           const res = await axios.post(
-            `http://localhost:8000/api/order/verify-payment`,
+            `${import.meta.env.VITE_API_URL}/api/order/verify-payment`,
             {
               razorpayPaymentId: response.razorpay_payment_id,
               orderId,

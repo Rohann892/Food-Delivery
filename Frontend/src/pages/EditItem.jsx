@@ -49,7 +49,7 @@ const EditItem = () => {
     const handleGetItem = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/item/get-by-id/${itemId}`,
+          `${import.meta.env.VITE_API_URL}/api/item/get-by-id/${itemId}`,
           { withCredentials: true },
         );
 
@@ -86,7 +86,7 @@ const EditItem = () => {
       }
 
       const res = await axios.post(
-        `http://localhost:8000/api/item/edit-item/${itemId}`,
+        `${import.meta.env.VITE_API_URL}/api/item/edit-item/${itemId}`,
         formData,
         {
           withCredentials: true,

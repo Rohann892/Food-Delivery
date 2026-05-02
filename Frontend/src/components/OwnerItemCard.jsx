@@ -12,7 +12,7 @@ const OwnerItemCard = ({ data }) => {
   const handleDelete = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/item/delete-item/${data._id}`,
+        `${import.meta.env.VITE_API_URL}/api/item/delete-item/${data._id}`,
         { withCredentials: true },
       );
       dispatch(setMyShopData(res.data));

@@ -16,7 +16,7 @@ const Shop = () => {
   const handleGetShop = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/item/get-by-shop/${shopId}`,
+        `${import.meta.env.VITE_API_URL}/api/item/get-by-shop/${shopId}`,
         {
           withCredentials: true,
         },

@@ -9,7 +9,7 @@ const useUpdateLocation = () => {
     const updateLocation = async (lat, lon) => {
       try {
         await axios.post(
-          `http://localhost:8000/api/user/update-location`,
+          `${import.meta.env.VITE_API_URL}/api/user/update-location`,
           { lat, lon },
           { withCredentials: true },
         );

@@ -40,7 +40,7 @@ const CreateEditShop = () => {
         formData.append("image", backendImage);
       }
       const res = await axios.post(
-        `http://localhost:8000/api/shop/create-edit`,
+        `${import.meta.env.VITE_API_URL}/api/shop/create-edit`,
         formData,
         {
           withCredentials: true,

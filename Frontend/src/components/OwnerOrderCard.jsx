@@ -21,7 +21,7 @@ const OwnerOrderCard = ({ data }) => {
   const handleUpdateStatus = async (orderId, shopId, status) => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/order/update-status/${orderId}/${shopId}`,
+        `${import.meta.env.VITE_API_URL}/api/order/update-status/${orderId}/${shopId}`,
         { status },
         {
           withCredentials: true,
@@ -37,7 +37,7 @@ const OwnerOrderCard = ({ data }) => {
 
   const handleRefresh = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/order/my-orders`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/my-orders`, {
         withCredentials: true,
       });
       if (res.data.success && res.data.orders) {

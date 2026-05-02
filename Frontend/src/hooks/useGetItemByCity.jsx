@@ -11,7 +11,7 @@ const useGetItemByCity = () => {
       try {
         if (!city) return;
         const res = await axios.get(
-          `http://localhost:8000/api/item/get-by-city/${city}`,
+          `${import.meta.env.VITE_API_URL}/api/item/get-by-city/${city}`,
           { withCredentials: true },
         );
         dispatch(setItemsInCity(res.data.items));

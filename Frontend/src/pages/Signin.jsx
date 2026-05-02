@@ -26,7 +26,7 @@ const Signin = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:8000/api/auth/signin`,
+        `${import.meta.env.VITE_API_URL}/api/auth/signin`,
         {
           email,
           password,
@@ -58,7 +58,7 @@ const Signin = () => {
       const res = await signInWithPopup(auth, provider);
 
       const result = await axios.post(
-        `http://localhost:8000/api/auth/google-auth`,
+        `${import.meta.env.VITE_API_URL}/api/auth/google-auth`,
         {
           fullName: res.user.displayName || res.user.email.split("@")[0],
           email: res.user.email,

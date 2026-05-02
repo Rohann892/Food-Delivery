@@ -18,7 +18,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:8000/api/auth/send-otp`,
+        `${import.meta.env.VITE_API_URL}/api/auth/send-otp`,
         {
           email,
         },
@@ -41,7 +41,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:8000/api/auth/verify-otp`,
+        `${import.meta.env.VITE_API_URL}/api/auth/verify-otp`,
         {
           email,
           otp,
@@ -68,7 +68,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `http://localhost:8000/api/auth/reset-password`,
+        `${import.meta.env.VITE_API_URL}/api/auth/reset-password`,
         { email, newPassword },
         {
           withCredentials: true,
