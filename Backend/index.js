@@ -17,7 +17,11 @@ import { socketHandler } from './socket.js';
 const app = express();
 const server = http.createServer(app);
 
-const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'].filter(Boolean);
+const allowedOrigins = [
+    process.env.FRONTEND_URL, 
+    'http://localhost:5173', 
+    'https://food-delivery-seven-livid.vercel.app'
+].filter(Boolean);
 
 const io = new Server(server,
     {
